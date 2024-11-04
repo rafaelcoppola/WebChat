@@ -1,0 +1,51 @@
+services:
+  app:
+    container_name: php8.2
+    extra_hosts:
+      - "host.docker.internar:host-gateway"
+    ports:
+      - 80:80
+      - 8000:8000
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - C:/Users/Rafael/Documents/Dev:/var/www/html/
+      - C:/Users/Rafael/.ssh/:/root/.ssh
+    environment:
+      - DB_HOST=db
+      - XDEBUG_SESSION=1
+    depends_on:
+      - db
+      - redis
+    networks:
+      - app-network
+
+  db:
+    image: mysql
+    container_name: mysql-laravel
+    ports:
+      - 2200:3306
+    environment:
+      MYSQL_USER: root 
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      MYSQL_DATABASE: chat
+      MYSQL_ROOT_PASSWORD: 
+    volumes:
+      - /var/lib/docker/volumes/ee9e6e8885c9ec9bbff3f3d5584596e9098c4b2531832ac74d7f6614bf4ea5ad/_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  redis:
+    image: redis
+    container_name: redis
+    ports:
+      - 6379:6379
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    name: app-network
+    driver: bridge

@@ -1,0 +1,36 @@
+FROM php:8.2.22-apache
+WORKDIR /var/www/html
+
+RUN apt-get update && apt-get install -y \
+    vim \
+    git \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    git \
+    sendmail \
+    zlib1g-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install mysqli zip gd pdo pdo_mysql\
+    && docker-php-ext-configure zip \
+    && docker-php-ext-install zip \
+    && docker-php-ext-install gd
+
+RUN pecl install xdebug \
+    && docker-php-ext-enable xdebug
+
+COPY 90-xdebug.ini "${PHP_INI_DIR}/conf.d"
+
+RUN mkdir -p /root/.ssh && \
+    chmod 0700 /root/.ssh
+
+RUN chown -R www-data:www-data /var/www/html
+
+EXPOSE 8000
+
+RUN cd /var/www/html/chat
+
+CMD php artisan serve --host=0.0.0.0 --port=8000
